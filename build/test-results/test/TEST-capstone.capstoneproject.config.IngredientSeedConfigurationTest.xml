@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="capstone.capstoneproject.config.IngredientSeedConfigurationTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-03T07:37:21.525Z" hostname="DESKTOP-DCN826N" time="0.091">
+  <properties/>
+  <testcase name="loadsIngredientsFromYamlAndSeedsThem()" classname="capstone.capstoneproject.config.IngredientSeedConfigurationTest" time="0.074"/>
+  <system-out><![CDATA[2026-10-03T16:37:21.526+09:00  INFO 3124 --- [CapstoneProject] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [capstone.capstoneproject.config.IngredientSeedConfigurationTest]: IngredientSeedConfigurationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-03T16:37:21.536+09:00  INFO 3124 --- [CapstoneProject] [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration capstone.capstoneproject.CapstoneProjectApplication for test class capstone.capstoneproject.config.IngredientSeedConfigurationTest
+2026-10-03T16:37:21.537+09:00  INFO 3124 --- [CapstoneProject] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [capstone.capstoneproject.config.IngredientSeedConfigurationTest]: IngredientSeedConfigurationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-03T16:37:21.539+09:00  INFO 3124 --- [CapstoneProject] [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration capstone.capstoneproject.CapstoneProjectApplication for test class capstone.capstoneproject.config.IngredientSeedConfigurationTest
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
