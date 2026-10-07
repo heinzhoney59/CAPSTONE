@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="capstone.capstoneproject.fridge.service.ExpiryDisposalSchedulerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-03T07:37:23.094Z" hostname="DESKTOP-DCN826N" time="0.003">
-  <properties/>
-  <testcase name="delegatesScheduledDisposalToService()" classname="capstone.capstoneproject.fridge.service.ExpiryDisposalSchedulerTest" time="0.002"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
