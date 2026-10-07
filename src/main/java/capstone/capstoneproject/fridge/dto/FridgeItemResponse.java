@@ -20,6 +20,7 @@ public record FridgeItemResponse(
         FridgeItemStatus status,
         long dDay,
         String expiryStatus,
+        String state,
         double expiryProgressRate
 ) {
     public static FridgeItemResponse from(FridgeItem item, LocalDate today) {
@@ -32,6 +33,7 @@ public record FridgeItemResponse(
 
         // 만료 당일은 긴급으로 표시하고, 다음 날부터 자동 폐기 대상이다.
         String expiryStatus = dDay < 0 ? "EXPIRED" : dDay <= 1 ? "URGENT" : dDay <= 3 ? "WARNING" : "FRESH";
+        String state = dDay >= 30 ? "green_state" : dDay >= 7 ? "orange_state" : "red_state";
         return new FridgeItemResponse(
                 item.getId(),
                 item.getIngredientMaster().getName(),
@@ -44,6 +46,7 @@ public record FridgeItemResponse(
                 item.getStatus(),
                 dDay,
                 expiryStatus,
+                state,
                 progress
         );
     }

@@ -1,0 +1,6 @@
+spring:
+  config:
+    import: classpath:data/ingredients.yaml
+
+ingredient-seed:
+  enabled: true

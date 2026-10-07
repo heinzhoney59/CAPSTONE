@@ -42,6 +42,10 @@ public class ConsumptionLog {
     @Column(nullable = false, precision = 12, scale = 3)
     private BigDecimal quantity;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private IngredientUnit unit;
+
     @Column(name = "consumed_at", nullable = false)
     private LocalDateTime consumedAt;
 
@@ -50,12 +54,14 @@ public class ConsumptionLog {
             Long mealLogId,
             ConsumptionLogType logType,
             BigDecimal quantity,
+            IngredientUnit unit,
             LocalDateTime consumedAt
     ) {
         this.fridgeItem = fridgeItem;
         this.mealLogId = mealLogId;
         this.logType = logType;
         this.quantity = quantity;
+        this.unit = unit;
         this.consumedAt = consumedAt;
     }
 }

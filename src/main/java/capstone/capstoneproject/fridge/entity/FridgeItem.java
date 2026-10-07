@@ -102,4 +102,11 @@ public class FridgeItem {
     public void changeStatus(FridgeItemStatus status) {
         this.status = status;
     }
+
+    public void consume(BigDecimal consumedQuantity) {
+        this.quantity = this.quantity.subtract(consumedQuantity);
+        if (this.quantity.signum() == 0) {
+            this.status = FridgeItemStatus.CONSUMED;
+        }
+    }
 }

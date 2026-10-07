@@ -1,6 +1,7 @@
 package capstone.capstoneproject.fridge.controller;
 
 import capstone.capstoneproject.fridge.dto.FridgeItemCreateRequest;
+import capstone.capstoneproject.fridge.dto.FridgeItemConsumeRequest;
 import capstone.capstoneproject.fridge.dto.FridgeItemResponse;
 import capstone.capstoneproject.fridge.dto.FridgeItemUpdateRequest;
 import capstone.capstoneproject.fridge.entity.Compartment;
@@ -76,5 +77,14 @@ public class FridgeItemController {
             @PathVariable Long itemId
     ) {
         fridgeItemService.delete(memberId, itemId);
+    }
+
+    @PostMapping("/{itemId}/consume")
+    public FridgeItemResponse consume(
+            @RequestHeader(value = "X-Member-Id", defaultValue = "1") Long memberId,
+            @PathVariable Long itemId,
+            @Valid @RequestBody FridgeItemConsumeRequest request
+    ) {
+        return fridgeItemService.consume(memberId, itemId, request);
     }
 }

@@ -1,0 +1,21 @@
+# 재료 화면에서 사용하는 표준 재료 마스터 초기 데이터.
+# 재료를 추가하거나 기본 보관일을 바꿀 때 Java 코드를 수정하지 않는다.
+ingredient-seed:
+  ingredients:
+    - name: 당근
+      # 사용자가 칸을 생략하면 이 기본 칸을 사용한다.
+      default-compartment: VEGETABLE
+      icon-url:
+      default-shelf-life-days: 14
+    - name: 돼지고기
+      default-compartment: FRESH_MEAT
+      icon-url:
+      default-shelf-life-days: 3
+    - name: 우유
+      default-compartment: DAIRY_AND_BEVERAGE
+      icon-url:
+      default-shelf-life-days: 7
+    - name: 사과
+      default-compartment: FRUIT
+      icon-url:
+      default-shelf-life-days: 14

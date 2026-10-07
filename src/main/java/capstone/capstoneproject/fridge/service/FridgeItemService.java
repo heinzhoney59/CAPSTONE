@@ -1,6 +1,7 @@
 package capstone.capstoneproject.fridge.service;
 
 import capstone.capstoneproject.fridge.dto.FridgeItemCreateRequest;
+import capstone.capstoneproject.fridge.dto.FridgeItemConsumeRequest;
 import capstone.capstoneproject.fridge.dto.FridgeItemResponse;
 import capstone.capstoneproject.fridge.dto.FridgeItemUpdateRequest;
 import capstone.capstoneproject.fridge.entity.Compartment;
@@ -8,11 +9,15 @@ import capstone.capstoneproject.fridge.entity.FridgeItem;
 import capstone.capstoneproject.fridge.entity.FridgeItemStatus;
 import capstone.capstoneproject.fridge.entity.InputMethod;
 import capstone.capstoneproject.fridge.entity.IngredientMaster;
+import capstone.capstoneproject.fridge.entity.ConsumptionLog;
+import capstone.capstoneproject.fridge.entity.ConsumptionLogType;
 import capstone.capstoneproject.fridge.repository.FridgeItemRepository;
+import capstone.capstoneproject.fridge.repository.ConsumptionLogRepository;
 import capstone.capstoneproject.fridge.repository.IngredientMasterRepository;
 import capstone.capstoneproject.member.entity.Member;
 import capstone.capstoneproject.member.repository.MemberRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -27,15 +32,18 @@ public class FridgeItemService {
     private final FridgeItemRepository fridgeItemRepository;
     private final IngredientMasterRepository ingredientMasterRepository;
     private final MemberRepository memberRepository;
+    private final ConsumptionLogRepository consumptionLogRepository;
 
     public FridgeItemService(
             FridgeItemRepository fridgeItemRepository,
             IngredientMasterRepository ingredientMasterRepository,
-            MemberRepository memberRepository
+            MemberRepository memberRepository,
+            ConsumptionLogRepository consumptionLogRepository
     ) {
         this.fridgeItemRepository = fridgeItemRepository;
         this.ingredientMasterRepository = ingredientMasterRepository;
         this.memberRepository = memberRepository;
+        this.consumptionLogRepository = consumptionLogRepository;
     }
 
     @Transactional
@@ -115,7 +123,40 @@ public class FridgeItemService {
     @Transactional
     public int discardExpiredItems() {
         // 유통기한 당일은 사용 가능하므로 오늘보다 이전인 재료만 폐기한다.
-        return fridgeItemRepository.discardExpiredItems(LocalDate.now());
+        LocalDate today = LocalDate.now();
+        List<FridgeItem> expiredItems = fridgeItemRepository.findAllByStatus(FridgeItemStatus.STORED).stream()
+                .filter(item -> item.getExpiryDate().isBefore(today))
+                .toList();
+        expiredItems.forEach(item -> {
+            item.changeStatus(FridgeItemStatus.DISCARDED);
+            saveLog(item, ConsumptionLogType.DISCARDED, item.getQuantity());
+        });
+        return expiredItems.size();
+    }
+
+    @Transactional
+    public FridgeItemResponse consume(Long memberId, Long itemId, FridgeItemConsumeRequest request) {
+        FridgeItem item = findItem(memberId, itemId);
+        if (item.getStatus() != FridgeItemStatus.STORED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "보관 중인 재료만 소진할 수 있습니다.");
+        }
+        if (request.quantity().compareTo(item.getQuantity()) > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "소진 수량이 현재 수량보다 많습니다.");
+        }
+        item.consume(request.quantity());
+        saveLog(item, ConsumptionLogType.CONSUMED, request.quantity());
+        return FridgeItemResponse.from(item, LocalDate.now());
+    }
+
+    private void saveLog(FridgeItem item, ConsumptionLogType type, java.math.BigDecimal quantity) {
+        consumptionLogRepository.save(new ConsumptionLog(
+                item,
+                null,
+                type,
+                quantity,
+                item.getUnit(),
+                LocalDateTime.now()
+        ));
     }
 
     private Member findMember(Long memberId) {

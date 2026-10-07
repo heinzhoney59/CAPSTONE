@@ -14,6 +14,8 @@ public interface FridgeItemRepository extends JpaRepository<FridgeItem, Long> {
 
     List<FridgeItem> findAllByMemberAndStatus(Member member, FridgeItemStatus status);
 
+    List<FridgeItem> findAllByStatus(FridgeItemStatus status);
+
     java.util.Optional<FridgeItem> findByIdAndMember(Long id, Member member);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)

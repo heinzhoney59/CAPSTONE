@@ -3,7 +3,6 @@ package capstone.capstoneproject.config;
 import capstone.capstoneproject.fridge.entity.Compartment;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.util.ArrayList;
@@ -17,7 +16,6 @@ public class IngredientSeedProperties {
 
     // YAML의 재료 목록을 타입 안전하게 바인딩한다.
     @Valid
-    @NotEmpty
     private List<IngredientSeed> ingredients = new ArrayList<>();
 
     public List<IngredientSeed> getIngredients() {

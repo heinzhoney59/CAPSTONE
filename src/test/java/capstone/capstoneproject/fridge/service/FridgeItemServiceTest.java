@@ -1,6 +1,7 @@
 package capstone.capstoneproject.fridge.service;
 
 import capstone.capstoneproject.fridge.dto.FridgeItemCreateRequest;
+import capstone.capstoneproject.fridge.dto.FridgeItemConsumeRequest;
 import capstone.capstoneproject.fridge.dto.FridgeItemResponse;
 import capstone.capstoneproject.fridge.dto.FridgeItemUpdateRequest;
 import capstone.capstoneproject.fridge.entity.Compartment;
@@ -8,7 +9,9 @@ import capstone.capstoneproject.fridge.entity.FridgeItem;
 import capstone.capstoneproject.fridge.entity.InputMethod;
 import capstone.capstoneproject.fridge.entity.IngredientMaster;
 import capstone.capstoneproject.fridge.entity.IngredientUnit;
+import capstone.capstoneproject.fridge.entity.FridgeItemStatus;
 import capstone.capstoneproject.fridge.repository.FridgeItemRepository;
+import capstone.capstoneproject.fridge.repository.ConsumptionLogRepository;
 import capstone.capstoneproject.fridge.repository.IngredientMasterRepository;
 import capstone.capstoneproject.member.entity.Member;
 import capstone.capstoneproject.member.repository.MemberRepository;
@@ -42,6 +45,9 @@ class FridgeItemServiceTest {
     @Mock
     private MemberRepository memberRepository;
 
+    @Mock
+    private ConsumptionLogRepository consumptionLogRepository;
+
     private Member member;
     private IngredientMaster carrot;
     private FridgeItemService service;
@@ -50,7 +56,12 @@ class FridgeItemServiceTest {
     void setUp() {
         member = new Member("test@example.com", "tester");
         carrot = new IngredientMaster("당근", Compartment.VEGETABLE, null, 14);
-        service = new FridgeItemService(fridgeItemRepository, ingredientMasterRepository, memberRepository);
+        service = new FridgeItemService(
+                fridgeItemRepository,
+                ingredientMasterRepository,
+                memberRepository,
+                consumptionLogRepository
+        );
         lenient().when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
         lenient().when(ingredientMasterRepository.findByName("당근")).thenReturn(Optional.of(carrot));
     }
@@ -156,11 +167,54 @@ class FridgeItemServiceTest {
 
     @Test
     void discardsItemsPastExpiryDate() {
-        when(fridgeItemRepository.discardExpiredItems(any(LocalDate.class))).thenReturn(2);
+        FridgeItem first = new FridgeItem(
+                member, carrot, Compartment.VEGETABLE, BigDecimal.ONE, IngredientUnit.PIECE,
+                LocalDate.now().minusDays(1), LocalDate.now().minusDays(7), InputMethod.MANUAL
+        );
+        FridgeItem second = new FridgeItem(
+                member, carrot, Compartment.VEGETABLE, BigDecimal.valueOf(2), IngredientUnit.PIECE,
+                LocalDate.now().minusDays(2), LocalDate.now().minusDays(8), InputMethod.MANUAL
+        );
+        when(fridgeItemRepository.findAllByStatus(FridgeItemStatus.STORED))
+                .thenReturn(List.of(first, second));
 
         int discardedCount = service.discardExpiredItems();
 
         assertThat(discardedCount).isEqualTo(2);
-        verify(fridgeItemRepository).discardExpiredItems(any(LocalDate.class));
+        verify(consumptionLogRepository, org.mockito.Mockito.times(2))
+                .save(any(capstone.capstoneproject.fridge.entity.ConsumptionLog.class));
+    }
+
+    @Test
+    void consumesPartOfStoredItemAndWritesLog() {
+        FridgeItem item = new FridgeItem(
+                member, carrot, Compartment.VEGETABLE, BigDecimal.valueOf(3), IngredientUnit.PIECE,
+                LocalDate.now().plusDays(3), LocalDate.now(), InputMethod.MANUAL
+        );
+        when(fridgeItemRepository.findByIdAndMember(1L, member)).thenReturn(Optional.of(item));
+
+        FridgeItemResponse response = service.consume(
+                1L, 1L, new FridgeItemConsumeRequest(BigDecimal.ONE)
+        );
+
+        assertThat(response.quantity()).isEqualByComparingTo("2");
+        assertThat(response.status()).isEqualTo(FridgeItemStatus.STORED);
+        verify(consumptionLogRepository).save(any(capstone.capstoneproject.fridge.entity.ConsumptionLog.class));
+    }
+
+    @Test
+    void rejectsConsumeQuantityGreaterThanStoredQuantity() {
+        FridgeItem item = new FridgeItem(
+                member, carrot, Compartment.VEGETABLE, BigDecimal.ONE, IngredientUnit.PIECE,
+                LocalDate.now().plusDays(3), LocalDate.now(), InputMethod.MANUAL
+        );
+        when(fridgeItemRepository.findByIdAndMember(1L, member)).thenReturn(Optional.of(item));
+
+        assertThatThrownBy(() -> service.consume(
+                1L, 1L, new FridgeItemConsumeRequest(BigDecimal.valueOf(2))
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(exception -> assertThat(((ResponseStatusException) exception).getStatusCode())
+                        .isEqualTo(org.springframework.http.HttpStatus.BAD_REQUEST));
     }
 }

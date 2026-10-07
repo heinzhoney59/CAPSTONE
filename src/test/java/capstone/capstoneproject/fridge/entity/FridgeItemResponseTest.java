@@ -26,6 +26,7 @@ class FridgeItemResponseTest {
 
         assertThat(response.dDay()).isEqualTo(7);
         assertThat(response.expiryStatus()).isEqualTo("FRESH");
+        assertThat(response.state()).isEqualTo("orange_state");
         assertThat(response.expiryProgressRate()).isZero();
         assertThat(response.status()).isEqualTo(FridgeItemStatus.STORED);
     }
@@ -42,6 +43,7 @@ class FridgeItemResponseTest {
 
         assertThat(response.dDay()).isEqualTo(-1);
         assertThat(response.expiryStatus()).isEqualTo("EXPIRED");
+        assertThat(response.state()).isEqualTo("red_state");
         assertThat(response.expiryProgressRate()).isEqualTo(1.0);
     }
 
@@ -54,6 +56,18 @@ class FridgeItemResponseTest {
         assertThat(responseFor(today, 2).expiryStatus()).isEqualTo("WARNING");
         assertThat(responseFor(today, 3).expiryStatus()).isEqualTo("WARNING");
         assertThat(responseFor(today, 4).expiryStatus()).isEqualTo("FRESH");
+    }
+
+    @Test
+    void handlesThreeLevelStateBoundaries() {
+        LocalDate today = LocalDate.of(2026, 10, 3);
+
+        assertThat(responseFor(today, 30).state()).isEqualTo("green_state");
+        assertThat(responseFor(today, 29).state()).isEqualTo("orange_state");
+        assertThat(responseFor(today, 7).state()).isEqualTo("orange_state");
+        assertThat(responseFor(today, 6).state()).isEqualTo("red_state");
+        assertThat(responseFor(today, 0).state()).isEqualTo("red_state");
+        assertThat(responseFor(today, -1).state()).isEqualTo("red_state");
     }
 
     private FridgeItemResponse responseFor(LocalDate today, int daysUntilExpiry) {

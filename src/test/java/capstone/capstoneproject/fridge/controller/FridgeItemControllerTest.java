@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
@@ -37,7 +39,7 @@ class FridgeItemControllerTest {
 
     private MockMvc mockMvc;
 
-    @BeforeEach
+    @BeforeEach//각 테스트 전에 한번씩 실해 하는 파일
     void setUp() {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.afterPropertiesSet();
@@ -46,12 +48,12 @@ class FridgeItemControllerTest {
                 .build();
     }
 
-    @Test
-    void createsItem() throws Exception {
+    @Test// 당근이라는 재료를 데이터베이스 생성하고 확인까지
+    void createsItem() {
         when(fridgeItemService.create(eq(1L), any()))
                 .thenReturn(response(1L, "당근", Compartment.VEGETABLE));
 
-        mockMvc.perform(post("/api/fridge/items")
+        perform(post("/api/fridge/items")
                         .header("X-Member-Id", "1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -61,20 +63,20 @@ class FridgeItemControllerTest {
                                   "unit": "PIECE",
                                   "expiryDate": "2026-10-10"
                                 }
-                                """))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.ingredientName").value("당근"))
-                .andExpect(jsonPath("$.quantity").value(2));
+                                """),
+                status().isCreated(),
+                jsonPath("$.ingredientName").value("당근"),
+                jsonPath("$.quantity").value(2));
 
         verify(fridgeItemService).create(eq(1L), any());
     }
 
     @Test
-    void updatesItem() throws Exception {
+    void updatesItem() {
         when(fridgeItemService.update(eq(1L), eq(1L), any()))
                 .thenReturn(response(1L, "당근", Compartment.FRUIT));
 
-        mockMvc.perform(patch("/api/fridge/items/1")
+        perform(patch("/api/fridge/items/1")
                         .header("X-Member-Id", "1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -85,40 +87,40 @@ class FridgeItemControllerTest {
                                   "unit": "GRAM",
                                   "expiryDate": "2026-10-13"
                                 }
-                                """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.compartment").value("FRUIT"));
+                                """),
+                status().isOk(),
+                jsonPath("$.compartment").value("FRUIT"));
 
         verify(fridgeItemService).update(eq(1L), eq(1L), any());
     }
 
     @Test
-    void deletesItem() throws Exception {
-        mockMvc.perform(delete("/api/fridge/items/1")
-                        .header("X-Member-Id", "1"))
-                .andExpect(status().isNoContent());
+    void deletesItem() {
+        perform(delete("/api/fridge/items/1")
+                        .header("X-Member-Id", "1"),
+                status().isNoContent());
 
         verify(fridgeItemService).delete(1L, 1L);
     }
 
     @Test
-    void listsItemsWithFilters() throws Exception {
+    void listsItemsWithFilters() {
         when(fridgeItemService.findAll(1L, "당", Compartment.VEGETABLE, "name", "desc"))
                 .thenReturn(List.of(response(1L, "당근", Compartment.VEGETABLE)));
 
-        mockMvc.perform(get("/api/fridge/items")
+        perform(get("/api/fridge/items")
                         .header("X-Member-Id", "1")
                         .queryParam("keyword", "당")
                         .queryParam("compartment", "VEGETABLE")
                         .queryParam("sort", "name")
-                        .queryParam("direction", "desc"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].ingredientName").value("당근"));
+                        .queryParam("direction", "desc"),
+                status().isOk(),
+                jsonPath("$[0].ingredientName").value("당근"));
     }
 
     @Test
-    void rejectsBlankIngredientName() throws Exception {
-        mockMvc.perform(post("/api/fridge/items")
+    void rejectsBlankIngredientName() {
+        perform(post("/api/fridge/items")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -127,13 +129,13 @@ class FridgeItemControllerTest {
                                   "unit": "PIECE",
                                   "expiryDate": "2026-10-10"
                                 }
-                                """))
-                .andExpect(status().isBadRequest());
+                                """),
+                status().isBadRequest());
     }
 
     @Test
-    void rejectsZeroOrNegativeQuantity() throws Exception {
-        mockMvc.perform(post("/api/fridge/items")
+    void rejectsZeroOrNegativeQuantity() {
+        perform(post("/api/fridge/items")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -142,25 +144,25 @@ class FridgeItemControllerTest {
                                   "unit": "PIECE",
                                   "expiryDate": "2026-10-10"
                                 }
-                                """))
-                .andExpect(status().isBadRequest());
+                                """),
+                status().isBadRequest());
     }
 
     @Test
-    void rejectsMissingRequiredFields() throws Exception {
-        mockMvc.perform(post("/api/fridge/items")
+    void rejectsMissingRequiredFields() {
+        perform(post("/api/fridge/items")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
                                   "ingredientName": "당근"
                                 }
-                                """))
-                .andExpect(status().isBadRequest());
+                                """),
+                status().isBadRequest());
     }
 
     @Test
-    void rejectsMalformedEnumDateAndMemberHeader() throws Exception {
-        mockMvc.perform(post("/api/fridge/items")
+    void rejectsMalformedEnumDateAndMemberHeader() {
+        perform(post("/api/fridge/items")
                         .header("X-Member-Id", "not-a-number")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -170,8 +172,45 @@ class FridgeItemControllerTest {
                                   "unit": "INVALID",
                                   "expiryDate": "not-a-date"
                                 }
-                                """))
-                .andExpect(status().isBadRequest());
+                                """),
+                status().isBadRequest());
+    }
+
+    @Test
+    void consumesItemWithValidQuantity() {
+        when(fridgeItemService.consume(eq(1L), eq(1L), any()))
+                .thenReturn(response(1L, "당근", Compartment.VEGETABLE));
+
+        perform(post("/api/fridge/items/1/consume")
+                        .header("X-Member-Id", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"quantity":1}
+                                """),
+                status().isOk(),
+                jsonPath("$.status").value("STORED"));
+
+        verify(fridgeItemService).consume(eq(1L), eq(1L), any());
+    }
+
+    @Test
+    void rejectsConsumeWithoutQuantity() {
+        perform(post("/api/fridge/items/1/consume")
+                        .header("X-Member-Id", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"),
+                status().isBadRequest());
+    }
+
+    private void perform(RequestBuilder request, ResultMatcher... matchers) {
+        try {
+            var result = mockMvc.perform(request);
+            for (ResultMatcher matcher : matchers) {
+                result.andExpect(matcher);
+            }
+        } catch (Exception exception) {
+            throw new AssertionError("MockMvc 요청 실행에 실패했습니다.", exception);
+        }
     }
 
     private FridgeItemResponse response(Long id, String name, Compartment compartment) {
@@ -187,6 +226,7 @@ class FridgeItemControllerTest {
                 FridgeItemStatus.STORED,
                 7,
                 "FRESH",
+                "orange_state",
                 0.0
         );
     }

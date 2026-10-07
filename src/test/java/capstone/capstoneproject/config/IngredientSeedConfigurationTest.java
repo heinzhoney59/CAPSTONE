@@ -18,9 +18,9 @@ class IngredientSeedConfigurationTest {
     @Autowired
     private IngredientMasterRepository ingredientMasterRepository;
 
-    @Test
+    @Test//더미 값 초기 설정
     void loadsIngredientsFromYamlAndSeedsThem() {
-        assertThat(ingredientSeedProperties.getIngredients()).hasSize(4);
+        assertThat(ingredientSeedProperties.getIngredients()).hasSize(4);//4개가 들어갔는지 확인
 
         Set<String> configuredNames = ingredientSeedProperties.getIngredients().stream()
                 .map(IngredientSeedProperties.IngredientSeed::getName)
