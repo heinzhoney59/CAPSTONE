@@ -21,18 +21,19 @@ public class Member {
     @Column(name = "member_id")
     private Long id;
 
-    @Column(name = "login_id", unique = true)
+    @Column(name = "login_id", unique = true, length = 50)
     private String loginId;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 50)
     private String nickname;
 
-    @Column(name = "password_hash")
+    @Column(name = "password_hash", length = 255)
     private String passwordHash;
 
+    @Column(length = 100)
     private String name;
 
     public Member(String email, String nickname) {

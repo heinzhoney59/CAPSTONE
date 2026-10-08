@@ -33,6 +33,7 @@ public class IngredientMaster {
     @Column(name = "icon_url", length = 500)
     private String iconUrl;
 
+    // 외부 식품 CSV에는 보관일 정보가 없을 수 있어 null을 허용한다.
     @Column(name = "default_shelf_life_days")
     private Integer defaultShelfLifeDays;
 

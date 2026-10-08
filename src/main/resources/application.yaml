@@ -1,6 +1,8 @@
 spring:
   application:
     name: CapstoneProject
+  config:
+    import: optional:classpath:data/ingredients.yaml
   h2:
     console:
       enabled: true
@@ -32,4 +34,4 @@ food-data:
     path: ${FOOD_DATA_IMPORT_PATH:}
     charset: ${FOOD_DATA_IMPORT_CHARSET:UTF-8}
 ingredient-seed:
-  enabled: false
+  enabled: true

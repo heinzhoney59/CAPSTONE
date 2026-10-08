@@ -18,7 +18,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "consumption_log")
+@Table(
+        name = "consumption_log",
+        indexes = {
+                @jakarta.persistence.Index(
+                        name = "idx_consumption_log_item_time",
+                        columnList = "fridge_item_id,consumed_at"
+                ),
+                @jakarta.persistence.Index(
+                        name = "idx_consumption_log_type_time",
+                        columnList = "log_type,consumed_at"
+                )
+        }
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ConsumptionLog {
