@@ -1,6 +1,8 @@
 spring:
   application:
     name: CapstoneProject
+  profiles:
+    active: ${DATABASE_SOURCE:h2}
   config:
     import: optional:classpath:data/ingredients.yaml
   h2:
@@ -26,7 +28,7 @@ fridge:
 gemini:
   api-key: ${GEMINI_API_KEY:}
   base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
-  model: ${GEMINI_MODEL:gemini-2.5-flash}
+  model: ${GEMINI_MODEL:gemini-3.1-flash-lite}
   timeout: ${GEMINI_TIMEOUT:30s}
 food-data:
   import:
@@ -35,3 +37,19 @@ food-data:
     charset: ${FOOD_DATA_IMPORT_CHARSET:UTF-8}
 ingredient-seed:
   enabled: true
+recipe-data:
+  import:
+    enabled: ${RECIPE_DATA_IMPORT_ENABLED:true}
+    path: ${RECIPE_DATA_IMPORT_PATH:classpath:data/한국농수산식품유통공사_학교급식전자조달시스템.csv}
+    charset: ${RECIPE_DATA_IMPORT_CHARSET:CP949}
+security:
+  jwt:
+    secret: ${JWT_SECRET:change-this-development-secret-at-least-32-bytes-long}
+    access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:15m}
+    refresh-token-ttl: ${JWT_REFRESH_TOKEN_TTL:30d}
+auth:
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:}
+    client-secret: ${GOOGLE_CLIENT_SECRET:}
+    redirect-uri: ${GOOGLE_REDIRECT_URI:{baseUrl}/login/oauth2/code/{registrationId}}
+    success-redirect: ${GOOGLE_SUCCESS_REDIRECT:http://localhost:8081}
