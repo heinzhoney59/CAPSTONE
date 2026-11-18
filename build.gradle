@@ -28,6 +28,7 @@ dependencies {
     implementation 'org.springframework.security:spring-security-oauth2-jose'
     implementation 'io.github.cdimascio:dotenv-java:3.2.0'
     implementation 'org.apache.commons:commons-csv:1.14.1'
+    implementation 'software.amazon.awssdk:s3:2.29.51'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'

@@ -55,13 +55,20 @@ public class FridgeItemService {
                 // 칸을 생략하면 표준 재료 마스터의 기본 칸을 적용한다.
                 ? ingredient.getDefaultCompartment()
                 : request.compartment();
+        LocalDate expiryDate = request.expiryDate();
+        if (expiryDate == null) {
+            int shelfLifeDays = ingredient.getDefaultShelfLifeDays() == null
+                    ? 7
+                    : ingredient.getDefaultShelfLifeDays();
+            expiryDate = LocalDate.now().plusDays(shelfLifeDays);
+        }
         FridgeItem item = new FridgeItem(
                 member,
                 ingredient,
                 compartment,
                 request.quantity(),
                 request.unit(),
-                request.expiryDate(),
+                expiryDate,
                 LocalDate.now(),
                 InputMethod.MANUAL
         );

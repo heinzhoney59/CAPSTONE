@@ -15,6 +15,7 @@ public record FridgeItemCreateRequest(
         Compartment compartment,
         @NotNull @DecimalMin("0.001") BigDecimal quantity,
         @NotNull IngredientUnit unit,
-        @NotNull LocalDate expiryDate
+        // null이면 재료 마스터의 기본 보관일수로 계산한다.
+        LocalDate expiryDate
 ) {
 }

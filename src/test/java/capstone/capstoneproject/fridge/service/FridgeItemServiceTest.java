@@ -86,6 +86,21 @@ class FridgeItemServiceTest {
     }
 
     @Test
+    void createsItemWithIngredientDefaultShelfLifeWhenExpiryIsMissing() {
+        when(fridgeItemRepository.save(any(FridgeItem.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        FridgeItemResponse response = service.create(
+                1L,
+                new FridgeItemCreateRequest(
+                        "당근", null, BigDecimal.ONE, IngredientUnit.PIECE, null
+                )
+        );
+
+        assertThat(response.expiryDate()).isEqualTo(LocalDate.now().plusDays(14));
+    }
+
+    @Test
     void rejectsUnknownMember() {
         when(memberRepository.findById(99L)).thenReturn(Optional.empty());
 

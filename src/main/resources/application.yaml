@@ -3,6 +3,10 @@ spring:
     name: CapstoneProject
   profiles:
     active: ${DATABASE_SOURCE:h2}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
   config:
     import: optional:classpath:data/ingredients.yaml
   h2:
@@ -30,6 +34,11 @@ gemini:
   base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
   model: ${GEMINI_MODEL:gemini-3.1-flash-lite}
   timeout: ${GEMINI_TIMEOUT:30s}
+aws:
+  s3:
+    bucket: ${AWS_S3_BUCKET:}
+    region: ${AWS_REGION:${AWS_S3_REGION:ap-northeast-2}}
+    public-base-url: ${AWS_S3_PUBLIC_BASE_URL:}
 food-data:
   import:
     enabled: ${FOOD_DATA_IMPORT_ENABLED:false}
